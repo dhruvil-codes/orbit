@@ -1,3 +1,0 @@
-"""
-Orbit Services Package
-"""
