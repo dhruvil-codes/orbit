@@ -37,4 +37,5 @@ async def get_db():
             await session.rollback()
             raise
 
-
+# Alias used by FastAPI Depends() in API routers
+get_async_session = get_db
