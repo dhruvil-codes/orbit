@@ -165,9 +165,9 @@ export default function DashboardPage() {
   // Caspian Event Stream State
   const [activeTab, setActiveTab] = useState<"email" | "telegram" | "slack">("email");
   const [copiedTab, setCopiedTab] = useState<string | null>(null);
-  const [eventLogs, setEventLogs] = useState<Array<{ id: number; text: string; time: string; channel: string }>>([
-    { id: 1, text: "Caspian SDK initialized on Telegram (@OrbitPDRBot) and Email Gateway", time: "10:14:02", channel: "system" },
-    { id: 2, text: "Listener registered on_message handler for multi-channel events", time: "10:14:05", channel: "listener" },
+  const [eventLogs, setEventLogs] = useState<Array<{ id: string | number; text: string; time: string; channel: string }>>([
+    { id: "1", text: "Caspian SDK initialized on Telegram (@OrbitPDRBot) and Email Gateway", time: "10:14:02", channel: "system" },
+    { id: "2", text: "Listener registered on_message handler for multi-channel events", time: "10:14:05", channel: "listener" },
   ]);
 
   // Fetch opportunities from Backend DB on mount
@@ -493,7 +493,8 @@ export default function DashboardPage() {
 
   const addEventLog = (text: string, channel: string) => {
     const nowStr = new Date().toLocaleTimeString();
-    setEventLogs((prev) => [{ id: Date.now(), text, time: nowStr, channel }, ...prev]);
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    setEventLogs((prev) => [{ id: uniqueId, text, time: nowStr, channel }, ...prev]);
   };
 
   const copyToClipboard = (text: string, tabName: string) => {
@@ -631,8 +632,8 @@ export default function DashboardPage() {
                 <Activity className="w-3.5 h-3.5 text-[#3ba6f1]" />
               </div>
               <div className="p-4 rounded-lg bg-[#fafaf9] border border-[#e8e6e5] font-mono text-[11px] space-y-2 h-44 overflow-y-auto">
-                {eventLogs.map((log) => (
-                  <div key={log.id} className="flex items-start space-x-2">
+                {eventLogs.map((log, idx) => (
+                  <div key={`${log.id}-${idx}`} className="flex items-start space-x-2">
                     <span className="text-[#78716c]">[{log.time}]</span>
                     <span className={`font-semibold ${log.channel === "telegram" ? "text-[#3398e1]" : log.channel === "email" ? "text-[#0c0a09]" : "text-[#78716c]"}`}>
                       [{log.channel.toUpperCase()}]
