@@ -24,7 +24,8 @@ class Settings(BaseSettings):
 
     # AI & Inference
     OPENAI_API_KEY: Optional[str] = None
-    DEFAULT_LLM_MODEL: str = "gpt-4o-mini"
+    OPENAI_API_BASE: Optional[str] = None
+    DEFAULT_LLM_MODEL: str = "Qwen/Qwen2.5-72B-Instruct"
 
     # Caspian SDK — Core Gateway
     CASPIAN_API_KEY: Optional[str] = None
