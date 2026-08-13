@@ -883,7 +883,7 @@ export default function DashboardPage() {
               <span className="font-semibold text-[#78716c] uppercase tracking-wider">
                 DISCOVERED INDIE SAAS PARTNERS FOR {userWebsiteDomain.toUpperCase()} ({topPartners.length} FOUNDER MATCHES)
               </span>
-              <span className="text-[#3398e1] font-mono text-[11px]">Product Hunt &amp; TrustMRR Ecosystem</span>
+              <span className="text-[#3398e1] font-mono text-[11px]">Peerlist, DevHunt, SaaSHub &amp; Product Hunt Launchpads</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -896,9 +896,16 @@ export default function DashboardPage() {
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#78716c]">
-                          Rank #{idx + 1} Founder Partner
-                        </span>
+                        <div className="flex items-center space-x-1.5 mb-1">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#78716c]">
+                            Rank #{idx + 1} Founder Partner
+                          </span>
+                          {(partner as any).platform_badge && (
+                            <span className="px-2 py-0.5 rounded bg-[#c1e1f7]/60 text-[#3398e1] font-mono text-[9px] font-bold">
+                              {(partner as any).platform_badge}
+                            </span>
+                          )}
+                        </div>
                         <h3 className="font-serif-heading text-xl text-[#0c0a09]">{partner.name}</h3>
                         <div className="font-mono text-[11px] text-[#78716c]">{partner.domain}</div>
                       </div>
