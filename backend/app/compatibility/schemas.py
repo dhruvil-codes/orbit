@@ -16,6 +16,9 @@ class EvaluatePartnershipRequest(BaseModel):
     company_a: CompanyInput
     company_b: CompanyInput
     dispatch_outreach: bool = Field(default=False, description="Whether to dispatch Caspian outreach if score > 80")
+    sender_name: Optional[str] = Field(default="Partnership Manager", description="User's explicit sender name")
+    sender_email: Optional[str] = Field(default="partnerships@useorbit.ai", description="User's explicit sender email")
+    sender_company: Optional[str] = Field(default="Orbit AI", description="User's explicit company name")
 
 class OutreachDrafts(BaseModel):
     email_subject: str = Field(..., description="Email proposal subject line")

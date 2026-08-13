@@ -29,3 +29,7 @@ class PartnershipService:
     async def list_opportunities(self) -> List[PartnershipOpportunityDTO]:
         return await self.repository.list_opportunities()
 
+    async def update_opportunity_stage(
+        self, opportunity_id: str, new_stage: str, event_note: str = ""
+    ) -> Optional[PartnershipOpportunityDTO]:
+        return await self.repository.update_opportunity_stage(opportunity_id, new_stage, event_note)

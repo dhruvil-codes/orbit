@@ -2,7 +2,8 @@
 Partnerships Domain Repository
 Database operations for PartnerCompany and PartnershipOpportunity models.
 """
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -60,7 +61,16 @@ class PartnershipRepository:
             title=opp_in.title,
             compatibility_score=opp_in.compatibility_score,
             status=opp_in.status,
+            stage=opp_in.stage,
             strategic_fit_summary=opp_in.strategic_fit_summary,
+            sender_name=opp_in.sender_name,
+            sender_email=opp_in.sender_email,
+            sender_company=opp_in.sender_company,
+            evidence_signals=opp_in.evidence_signals,
+            founder_intel=opp_in.founder_intel,
+            reasoning_card=opp_in.reasoning_card,
+            outreach_drafts=opp_in.outreach_drafts,
+            timeline_events=opp_in.timeline_events,
         )
         self.session.add(opp)
         await self.session.commit()
@@ -97,13 +107,14 @@ class PartnershipRepository:
                 selectinload(PartnershipOpportunity.primary_company),
                 selectinload(PartnershipOpportunity.partner_company),
             )
+            .order_by(PartnershipOpportunity.created_at.desc())
             .limit(limit)
         )
         opps = result.scalars().all()
         return [PartnershipOpportunityDTO.model_validate(o) for o in opps]
 
-    async def update_opportunity_status(
-        self, opportunity_id: str, new_status: str
+    async def update_opportunity_stage(
+        self, opportunity_id: str, new_stage: str, event_note: str = ""
     ) -> Optional[PartnershipOpportunityDTO]:
         result = await self.session.execute(
             select(PartnershipOpportunity).where(PartnershipOpportunity.id == opportunity_id)
@@ -111,8 +122,18 @@ class PartnershipRepository:
         opp = result.scalar_one_or_none()
         if not opp:
             return None
-        opp.status = new_status
+        opp.stage = new_stage
+        opp.status = new_stage.lower()
+
+        # Append to timeline events
+        events = list(opp.timeline_events or [])
+        events.append({
+            "stage": new_stage,
+            "timestamp": datetime.utcnow().isoformat(),
+            "note": event_note or f"Opportunity transitioned to stage: {new_stage}"
+        })
+        opp.timeline_events = events
+
         await self.session.commit()
         await self.session.refresh(opp)
         return await self.get_opportunity_by_id(opportunity_id)
-
