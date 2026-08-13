@@ -17,6 +17,19 @@ class EvaluatePartnershipRequest(BaseModel):
     company_b: CompanyInput
     dispatch_outreach: bool = Field(default=False, description="Whether to dispatch Caspian outreach if score > 80")
 
+class OutreachDrafts(BaseModel):
+    email_subject: str = Field(..., description="Email proposal subject line")
+    email_body: str = Field(..., description="Formatted email outreach proposal")
+    telegram_alert: str = Field(..., description="Interactive Telegram manager approval alert")
+    slack_announcement: str = Field(..., description="Slack channel team message preview")
+
+class FounderIntel(BaseModel):
+    executive_name: str
+    executive_role: str
+    email: str
+    email_verified: bool
+    platforms: Dict[str, Any]
+
 class CompatibilityAnalysisResult(BaseModel):
     compatibility_score: float = Field(..., ge=0.0, le=100.0, description="Compatibility Score (0–100)")
     confidence_score: float = Field(..., ge=0.0, le=100.0, description="Confidence Score (0–100)")
@@ -26,3 +39,5 @@ class CompatibilityAnalysisResult(BaseModel):
     co_marketing_opportunities: List[str] = Field(default_factory=list, description="Joint marketing strategies")
     recommended_outreach_angle: str = Field(..., description="Recommended initial outreach angle")
     reasoning_card: Optional[AIReasoningCard] = Field(default=None, description="Structured AI Reasoning Card")
+    outreach_drafts: Optional[OutreachDrafts] = Field(default=None, description="Multi-channel outreach message previews")
+    founder_intel: Optional[FounderIntel] = Field(default=None, description="Decision maker and founder intelligence")
