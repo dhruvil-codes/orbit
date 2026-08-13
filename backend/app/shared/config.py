@@ -27,6 +27,18 @@ class Settings(BaseSettings):
     OPENAI_API_BASE: Optional[str] = None
     DEFAULT_LLM_MODEL: str = "Qwen/Qwen2.5-72B-Instruct"
 
+    # Featherless.ai aliases (same key, named for clarity in discovery service)
+    @property
+    def FEATHERLESS_API_KEY(self) -> Optional[str]:
+        return self.OPENAI_API_KEY
+
+    @property
+    def FEATHERLESS_MODEL(self) -> str:
+        return self.DEFAULT_LLM_MODEL
+
+    # Web Search — Tavily (used for real-time SaaS partner discovery)
+    TAVILY_API_KEY: Optional[str] = None
+
     # Caspian SDK — Core Gateway
     CASPIAN_API_KEY: Optional[str] = None
     CASPIAN_BASE_URL: str = "https://api.trycaspianai.com"
@@ -40,6 +52,7 @@ class Settings(BaseSettings):
 
     # Orbit Manager Config — who receives partnership approval alerts
     ORBIT_MANAGER_CONVERSATION_ID: Optional[str] = None    # Caspian conversation ID for manager Telegram
+
 
     model_config = SettingsConfigDict(
         env_file=str(_ENV_FILE),
