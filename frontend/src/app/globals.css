@@ -46,22 +46,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Heading Typography — Instrument Serif */
-h1, h2, h3, .font-serif-heading {
+/* Display & Section Headline Typography — Instrument Serif */
+h1, h2, .font-serif-heading {
   font-family: var(--font-serif-heading);
   letter-spacing: -0.02em;
-}
-
-h1 {
   font-weight: 400;
 }
 
-h2 {
-  font-weight: 400;
-}
-
-h3 {
-  font-weight: 400;
+/* Card titles, subheadings, and UI copy — Geist Sans */
+h3, h4, h5, h6, .stone-card, input, button, label, select {
+  font-family: var(--font-geist-body);
 }
 
 /* Seline Component Styles */
@@ -70,6 +64,7 @@ h3 {
   border: 1px solid #e8e6e5;
   border-radius: 10px;
   box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .floating-preview-card {
@@ -133,7 +128,7 @@ h3 {
   font-size: 14px;
   color: #0c0a09;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .input-stone:focus {
