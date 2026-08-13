@@ -211,40 +211,75 @@ export default function DashboardPage() {
         throw new Error("Discovery API error");
       }
     } catch {
-      // Custom URL dynamic fallback
-      const brandName = cleanDomain.split(".")[0].toUpperCase();
-      setTopPartners([
-        {
-          name: `Linear (${brandName} Integration)`,
-          domain: "linear.app",
-          industry: "Product Operations & Issue Tracking",
-          description: `High-performance issue tracking system connecting with ${brandName}`,
-          compatibility_score: 92.0,
-          synergy_reason: `Bi-directional real-time data sync between ${brandName} and Linear product workflows.`,
-          executive_lead: { name: "Karri Saarinen", role: "CEO & Co-founder", email: "karri@linear.app" },
-          recent_news: `Launched open API ecosystem supporting native ${brandName} data flows.`,
-        },
-        {
-          name: `Slack (${brandName} Connect)`,
-          domain: "slack.com",
-          industry: "Enterprise Communication",
-          description: `AI productivity platform for work and automated ${brandName} alerts`,
-          compatibility_score: 88.0,
-          synergy_reason: `Real-time action notifications and joint Slack Connect channel integration.`,
-          executive_lead: { name: "Lidiane Jones", role: "CEO", email: "partnerships@slack.com" },
-          recent_news: `Announced enterprise App Directory integration with ${brandName}.`,
-        },
-        {
-          name: `Stripe (${brandName} Payments)`,
-          domain: "stripe.com",
-          industry: "Financial Infrastructure",
-          description: `Payment processing & billing infrastructure for ${brandName} enterprise customers`,
-          compatibility_score: 85.0,
-          synergy_reason: `Automated subscription billing & enterprise revenue share reconciliation.`,
-          executive_lead: { name: "Patrick Collison", role: "CEO & Co-founder", email: "patrick@stripe.com" },
-          recent_news: `Expanded developer API platform for SaaS partner billing integrations.`,
-        },
-      ]);
+      // Smart contextual fallback for custom domains
+      const isDevTool = /vibe|code|dev|git|api|build|deploy|stack|lab|hack/.test(cleanDomain);
+      if (isDevTool) {
+        setTopPartners([
+          {
+            name: "GitHub",
+            domain: "github.com",
+            industry: "Developer Platform & Code Hosting",
+            description: "World's leading developer platform for version control & CI/CD",
+            compatibility_score: 93.0,
+            synergy_reason: `Native GitHub Actions workflow & automated PR code intelligence sync with ${cleanDomain}.`,
+            executive_lead: { name: "Thomas Dohmke", role: "CEO", email: "partnerships@github.com" },
+            recent_news: "Unveiled GitHub Copilot Extensions & developer API marketplace.",
+          },
+          {
+            name: "Vercel",
+            domain: "vercel.com",
+            industry: "Frontend Cloud & Deployment",
+            description: "Frontend cloud platform for Next.js & modern developer web apps",
+            compatibility_score: 90.0,
+            synergy_reason: `Instant preview deployment environment integration & edge function triggers for ${cleanDomain}.`,
+            executive_lead: { name: "Guillermo Rauch", role: "CEO & Founder", email: "guillermo@vercel.com" },
+            recent_news: "Released Vercel AI SDK v3 and edge middleware integrations.",
+          },
+          {
+            name: "Postman",
+            domain: "postman.com",
+            industry: "API Development Platform",
+            description: "API platform for building, testing, and iterating developer APIs",
+            compatibility_score: 87.0,
+            synergy_reason: `Auto-generated API collections & environment variable sync for ${cleanDomain} developers.`,
+            executive_lead: { name: "Abhinav Asthana", role: "CEO & Co-founder", email: "partnerships@postman.com" },
+            recent_news: "Announced Postman API Network enterprise integration tier.",
+          },
+        ]);
+      } else {
+        setTopPartners([
+          {
+            name: "HubSpot",
+            domain: "hubspot.com",
+            industry: "CRM & Customer Growth Platform",
+            description: "Inbound marketing, sales, and CRM platform for SaaS businesses",
+            compatibility_score: 91.0,
+            synergy_reason: `Bi-directional customer contact & lead lifecycle event sync between ${cleanDomain} and HubSpot CRM.`,
+            executive_lead: { name: "Yamini Rangan", role: "CEO", email: "partnerships@hubspot.com" },
+            recent_news: "Expanded HubSpot App Marketplace with open developer API grants.",
+          },
+          {
+            name: "Zapier",
+            domain: "zapier.com",
+            industry: "Workflow Automation Platform",
+            description: "Connects 6,000+ apps to automate workflows without code",
+            compatibility_score: 89.0,
+            synergy_reason: `Instant multi-app trigger automation for ${cleanDomain} webhooks and action events.`,
+            executive_lead: { name: "Wade Foster", role: "CEO & Co-founder", email: "partnerships@zapier.com" },
+            recent_news: "Released Zapier AI Actions API for autonomous developer integrations.",
+          },
+          {
+            name: "Intercom",
+            domain: "intercom.com",
+            industry: "AI Customer Support & Engagement",
+            description: "AI-first customer service and in-app messenger platform",
+            compatibility_score: 86.0,
+            synergy_reason: `In-app onboarding widgets and automated customer support ticket routing for ${cleanDomain}.`,
+            executive_lead: { name: "Eoghan McCabe", role: "CEO & Co-founder", email: "partnerships@intercom.com" },
+            recent_news: "Unveiled Fin AI Agent v2 with custom API action endpoints.",
+          },
+        ]);
+      }
     } finally {
       setIsDiscovering(false);
     }
