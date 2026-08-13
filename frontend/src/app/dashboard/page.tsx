@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,33 +8,20 @@ import {
   Zap,
   CheckCircle2,
   Send,
-  MessageSquare,
-  ArrowRight,
-  ShieldCheck,
-  Brain,
-  Building2,
   RefreshCw,
   Mail,
   Smartphone,
-  ChevronRight,
-  Copy,
-  Check,
   Search,
   UserCheck,
-  Share2,
-  ExternalLink,
   Layers,
   ArrowLeft,
   X,
   FileText,
-  Clock,
   Activity,
-  Sparkles,
   ArrowUpRight,
   Loader2,
   Globe,
   TrendingUp,
-  Code,
   Target,
   FileCode,
   Radio,
@@ -156,6 +143,11 @@ interface OpportunityItem {
   partner_company?: { name: string; domain: string };
 }
 
+type OpportunityApiItem = OpportunityItem & {
+  primary_company?: { name?: string };
+  partner_company?: { name?: string };
+};
+
 export default function DashboardPage() {
   // Sender Identity & Custom Input State
   const [senderName, setSenderName] = useState("Dhruvil Mistry");
@@ -169,20 +161,27 @@ export default function DashboardPage() {
   // Partner Discovery State (Step 2)
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [topPartners, setTopPartners] = useState<DiscoveredPartner[]>([]);
-  const [selectedPartner, setSelectedPartner] = useState<DiscoveredPartner | null>(null);
+  const [, setSelectedPartner] = useState<DiscoveredPartner | null>(null);
 
   // Pipeline & Report Loading State (Step 3)
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingStep, setLoadingStep] = useState<string>("Analyzing Website & Scraping API Surfaces...");
   const [opportunities, setOpportunities] = useState<OpportunityItem[]>([]);
   const [selectedOpp, setSelectedOpp] = useState<OpportunityItem | null>(null);
+  const generatedIdRef = useRef(0);
 
   // Caspian Log Stream
-  const [activeTab, setActiveTab] = useState<"email" | "telegram" | "slack">("email");
   const [eventLogs, setEventLogs] = useState<Array<{ id: string | number; text: string; time: string; channel: string }>>([
     { id: "1", text: "Caspian SDK initialized on Telegram (@OrbitPDRBot) and Email Gateway", time: "10:14:02", channel: "system" },
     { id: "2", text: "Orbit AI PDR Listener active & listening for founder partner approvals", time: "10:14:05", channel: "listener" },
   ]);
+
+  function addEventLog(text: string, channel: string) {
+    const nowStr = new Date().toLocaleTimeString();
+    generatedIdRef.current += 1;
+    const uniqueId = `event-${generatedIdRef.current}`;
+    setEventLogs((prev) => [{ id: uniqueId, text, time: nowStr, channel }, ...prev]);
+  }
 
   // Clean domain sanitizer helper
   const sanitizeDomain = (rawDomain: string): string => {
@@ -202,19 +201,13 @@ export default function DashboardPage() {
     return brand.charAt(0).toUpperCase() + brand.slice(1);
   };
 
-  // Initial Auto-Discovery on mount
-  useEffect(() => {
-    fetchOpportunities();
-    handleAnalyzeAndDiscover("magicui.design");
-  }, []);
-
   const fetchOpportunities = async () => {
     try {
       const res = await fetch("http://localhost:8000/api/v1/opportunities/");
       if (res.ok) {
         const data = await res.json();
         if (data.items && data.items.length > 0) {
-          const mapped: OpportunityItem[] = data.items.map((item: any) => ({
+          const mapped: OpportunityItem[] = (data.items as OpportunityApiItem[]).map((item) => ({
             ...item,
             company_a: item.primary_company?.name || item.company_a || "Magic UI",
             company_b: item.partner_company?.name || item.company_b || "Partner",
@@ -233,7 +226,7 @@ export default function DashboardPage() {
     const cleanDom = sanitizeDomain(targetUrl);
     const newBrand = deriveBrandName(cleanDom);
 
-    // DYNAMIC STATE RESET — Fixes stale residual data bug!
+    // Dynamic state reset keeps prior partner data from leaking between analyses.
     setUserWebsiteDomain(cleanDom);
     setSenderCompany(newBrand);
     setSelectedOpp(null);
@@ -256,7 +249,7 @@ export default function DashboardPage() {
         setMetadata({
           domain: cleanDom,
           brand_name: newBrand,
-          title: cleanDom.includes("magicui") ? "Magic UI — React & Tailwind UI Component Library" : `${newBrand} — SaaS Growth Platform`,
+          title: cleanDom.includes("magicui") ? "Magic UI - React & Tailwind UI Component Library" : `${newBrand} - SaaS Growth Platform`,
           description: cleanDom.includes("magicui") ? "Beautiful UI components and templates to make your landing page look stunning." : `Modern SaaS application operating on ${cleanDom}.`,
           category: cleanDom.includes("magicui") ? "UI Component Library & Frontend Tools" : "B2B SaaS Growth & Productivity",
           target_icp: cleanDom.includes("magicui") ? "React Developers, Next.js Engineers & Web Designers" : "SaaS Founders & Remote Teams",
@@ -451,6 +444,15 @@ export default function DashboardPage() {
     }
   };
 
+  // Initial Auto-Discovery on mount
+  useEffect(() => {
+    queueMicrotask(() => {
+      void fetchOpportunities();
+      void handleAnalyzeAndDiscover("magicui.design");
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // STEP 3: Generate Deep & Highly Detailed Strategic Report
   const handleSelectPartnerAndGenerateReport = async (partner: DiscoveredPartner) => {
     setSelectedPartner(partner);
@@ -500,9 +502,11 @@ export default function DashboardPage() {
       }
     } catch {
       // Create DEEP, Highly Detailed Report answering the 5 Core Strategic Questions!
+      generatedIdRef.current += 1;
+      const localOpportunityId = `opp_${generatedIdRef.current}`;
       const mockData: OpportunityItem = {
-        id: `opp_${Date.now()}`,
-        opportunity_id: `opp_${Date.now()}`,
+        id: localOpportunityId,
+        opportunity_id: localOpportunityId,
         title: `${activeBrand} & ${partner.name} Strategic Partnership Report`,
         company_a: activeBrand,
         company_b: partner.name,
@@ -576,8 +580,8 @@ export default function DashboardPage() {
         },
         outreach_drafts: {
           email_subject: `Founder Partnership Proposal: ${activeBrand} x ${partner.name}`,
-          email_body: `Hi ${partner.executive_lead.name.split(" ")[0]},\n\nI'm reaching out from ${activeBrand} (${senderEmail}). Congrats on ${partner.recent_news}!\n\nOur AI Partnership Agent (Orbit) analyzed ${activeBrand} (${cleanUserDomain}) and ${partner.name} (${partner.domain}), identifying a strong 95/100 strategic compatibility match:\n\nSTRATEGIC SYNERGY:\n${partner.synergy_reason}\n\nPROPOSED CO-MARKETING / POC:\n• Joint co-marketing campaign to our combined developer list\n• Bi-directional Webhook & API integration for shared users\n\nWould you be open to a quick 10-minute founder chat next week?\n\nBest regards,\n${senderName}\n${activeBrand} | ${senderEmail}`,
-          telegram_alert: `🎯 *Orbit AI PDR Alert*\nTarget: ${activeBrand} x ${partner.name}\nScore: *${partner.compatibility_score}/100*\nFounder: ${partner.executive_lead.name}\n\nReply *APPROVE* to trigger Caspian Email Outreach or *REJECT* to park.`,
+          email_body: `Hi ${partner.executive_lead.name.split(" ")[0]},\n\nI'm reaching out from ${activeBrand} (${senderEmail}). Congrats on ${partner.recent_news}!\n\nOur AI Partnership Agent (Orbit) analyzed ${activeBrand} (${cleanUserDomain}) and ${partner.name} (${partner.domain}), identifying a strong 95/100 strategic compatibility match:\n\nSTRATEGIC SYNERGY:\n${partner.synergy_reason}\n\nPROPOSED CO-MARKETING / POC:\n- Joint co-marketing campaign to our combined developer list\n- Bi-directional Webhook & API integration for shared users\n\nWould you be open to a quick 10-minute founder chat next week?\n\nBest regards,\n${senderName}\n${activeBrand} | ${senderEmail}`,
+          telegram_alert: `*Orbit AI PDR Alert*\nTarget: ${activeBrand} x ${partner.name}\nScore: *${partner.compatibility_score}/100*\nFounder: ${partner.executive_lead.name}\n\nReply *APPROVE* to trigger Caspian Email Outreach or *REJECT* to park.`,
           slack_announcement: `:rocket: *New Indie SaaS Partnership Discovered*\n*${activeBrand}* + *${partner.name}* | Score: \`${partner.compatibility_score}/100\`\nFounder: ${partner.executive_lead.name} (${partner.executive_lead.email})`,
         },
         timeline_events: [
@@ -701,14 +705,8 @@ export default function DashboardPage() {
     addEventLog(`Generated response draft & sent Telegram approval alert (@OrbitPDRBot)`, "telegram");
   };
 
-  const addEventLog = (text: string, channel: string) => {
-    const nowStr = new Date().toLocaleTimeString();
-    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-    setEventLogs((prev) => [{ id: uniqueId, text, time: nowStr, channel }, ...prev]);
-  };
-
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-[#0c0a09] font-sans selection:bg-[#c1e1f7] selection:text-[#3398e1]">
+    <div className="min-h-screen bg-[#fafaf9] text-[#0c0a09] selection:bg-[#c1e1f7] selection:text-[#3398e1]">
       {/* REPORT GENERATION LOADING OVERLAY */}
       <AnimatePresence>
         {isLoading && (
@@ -751,50 +749,81 @@ export default function DashboardPage() {
         )}
       </AnimatePresence>
 
-      {/* WORKSPACE NAVIGATION BAR */}
-      <nav className="sticky top-0 z-50 bg-[#fafaf9]/90 backdrop-blur-md border-b border-[#e8e6e5] px-6 py-3.5">
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Link href="/" className="flex items-center space-x-2 text-[#78716c] hover:text-[#0c0a09] transition-colors text-xs mr-2">
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Landing</span>
-            </Link>
-            <div className="h-4 w-px bg-[#e8e6e5]" />
-            <div className="w-6 h-6 rounded bg-[#0c0a09] flex items-center justify-center text-white">
-              <Flame className="w-3.5 h-3.5 text-[#3ba6f1]" />
+      <div className="workspace-shell">
+        <aside className="workspace-sidebar">
+          <div className="workspace-brand">
+            <span className="workspace-brand-icon">
+              <Flame className="h-4 w-4" />
+            </span>
+            <div>
+              <strong>Orbit</strong>
+              <span>AI PDR</span>
             </div>
-            <span className="font-medium text-sm tracking-tight text-[#0c0a09]">
-              Orbit <span className="font-normal text-[#78716c]">Indie SaaS Workspace</span>
-            </span>
           </div>
 
-          <div className="hidden lg:flex items-center space-x-6 text-xs text-[#78716c] font-normal">
-            <a href="#discovery-engine" className="hover:text-[#0c0a09] transition-colors">
-              Niche Discovery
+          <nav className="workspace-nav" aria-label="Workspace navigation">
+            <a href="#discovery-engine" className="active">
+              <TrendingUp className="h-4 w-4" />
+              Discovery
             </a>
-            <a href="#command-center" className="hover:text-[#0c0a09] transition-colors">
-              Caspian Center
+            <a href="#command-center">
+              <Radio className="h-4 w-4" />
+              Caspian
             </a>
-            <a href="#pipeline" className="hover:text-[#0c0a09] transition-colors">
-              Deal Pipeline
+            <a href="#pipeline">
+              <Layers className="h-4 w-4" />
+              Pipeline
             </a>
-          </div>
+          </nav>
 
-          <div className="flex items-center space-x-2 text-xs">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-[#ffffff] border border-[#e8e6e5] text-[#0c0a09]">
-              <Smartphone className="w-3 h-3 text-[#3ba6f1] mr-1.5" />
-              Telegram: <strong className="ml-1 text-[#0c0a09] font-normal">@OrbitPDRBot</strong>
-            </span>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-[#ffffff] border border-[#e8e6e5] text-[#0c0a09]">
-              <TrendingUp className="w-3 h-3 text-[#3ba6f1] mr-1.5" />
-              Caspian Delivery: <strong className="ml-1 text-[#0c0a09] font-normal">Active</strong>
-            </span>
+          <div className="workspace-sidebar-footer">
+            <span>Gateway status</span>
+            <strong>Caspian active</strong>
           </div>
-        </div>
-      </nav>
+        </aside>
+
+        <div className="workspace-content">
+          <header className="workspace-header">
+            <div>
+              <Link href="/" className="workspace-back-link">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Back to landing
+              </Link>
+              <h1 className="font-serif-heading">Partnership Workspace</h1>
+              <p>Discover, approve, and track founder partnership outreach from one command surface.</p>
+            </div>
+
+            <div className="workspace-status-row">
+              <span>
+                <Smartphone className="h-3.5 w-3.5" />
+                @OrbitPDRBot
+              </span>
+              <span>
+                <Mail className="h-3.5 w-3.5" />
+                Email gateway active
+              </span>
+            </div>
+          </header>
 
       {/* MAIN CONTAINER */}
-      <main className="max-w-[1200px] mx-auto px-6 py-8 space-y-8">
+      <main className="workspace-main">
+        <section className="workspace-kpi-grid" aria-label="Workspace summary">
+          <div className="workspace-kpi-card">
+            <span>Active opportunities</span>
+            <strong>{opportunities.length}</strong>
+            <p>Tracked in pipeline</p>
+          </div>
+          <div className="workspace-kpi-card">
+            <span>Partner matches</span>
+            <strong>{topPartners.length}</strong>
+            <p>Generated for {userWebsiteDomain}</p>
+          </div>
+          <div className="workspace-kpi-card">
+            <span>Caspian events</span>
+            <strong>{eventLogs.length}</strong>
+            <p>Recent communication logs</p>
+          </div>
+        </section>
         {/* 1. SENDER IDENTITY CONFIGURATION */}
         <section className="stone-card p-5 space-y-3 bg-[#ffffff]">
           <div className="flex items-center justify-between border-b border-[#e8e6e5] pb-3">
@@ -907,25 +936,25 @@ export default function DashboardPage() {
               onClick={() => handleAnalyzeAndDiscover("magicui.design")}
               className="px-2.5 py-1 rounded-full bg-[#fafaf9] hover:bg-[#ffffff] border border-[#e8e6e5] text-[#0c0a09] cursor-pointer font-medium"
             >
-              🎨 magicui.design (UI Library)
+              magicui.design (UI Library)
             </button>
             <button
               onClick={() => handleAnalyzeAndDiscover("superx.com")}
               className="px-2.5 py-1 rounded-full bg-[#fafaf9] hover:bg-[#ffffff] border border-[#e8e6e5] text-[#0c0a09] cursor-pointer font-medium"
             >
-              🚀 superx.com (Creator Tool)
+              superx.com (Creator Tool)
             </button>
             <button
               onClick={() => handleAnalyzeAndDiscover("senja.io")}
               className="px-2.5 py-1 rounded-full bg-[#fafaf9] hover:bg-[#ffffff] border border-[#e8e6e5] text-[#0c0a09] cursor-pointer"
             >
-              💬 senja.io ($45k MRR)
+              senja.io ($45k MRR)
             </button>
             <button
               onClick={() => handleAnalyzeAndDiscover("dubs.co")}
               className="px-2.5 py-1 rounded-full bg-[#fafaf9] hover:bg-[#ffffff] border border-[#e8e6e5] text-[#0c0a09] cursor-pointer"
             >
-              🔗 dubs.co (TrustMRR #1)
+              dubs.co (TrustMRR #1)
             </button>
           </div>
 
@@ -999,9 +1028,9 @@ export default function DashboardPage() {
                           <span className="text-[10px] font-semibold uppercase tracking-wider text-[#78716c]">
                             Rank #{idx + 1} Founder Partner
                           </span>
-                          {(partner as any).platform_badge && (
+                          {partner.platform_badge && (
                             <span className="px-2 py-0.5 rounded bg-[#c1e1f7]/60 text-[#3398e1] font-mono text-[9px] font-bold">
-                              {(partner as any).platform_badge}
+                              {partner.platform_badge}
                             </span>
                           )}
                         </div>
@@ -1126,7 +1155,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="stone-card overflow-hidden bg-[#ffffff]">
+          <div className="stone-card overflow-x-auto bg-[#ffffff]">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#fafaf9] border-b border-[#e8e6e5] text-[#78716c] font-medium">
                 <tr>
@@ -1146,7 +1175,6 @@ export default function DashboardPage() {
                   </tr>
                 ) : (
                   opportunities.map((opp, idx) => {
-                    const oppId = opp.id || opp.opportunity_id;
                     const isOutreachSent = opp.stage === "OUTREACH_SENT" || opp.stage === "RESPONSE_SENT";
                     return (
                       <tr key={idx} className="hover:bg-[#fafaf9]/60 transition-colors">
@@ -1169,7 +1197,7 @@ export default function DashboardPage() {
                             {opp.stage || "AWAITING_APPROVAL"}
                           </span>
                           <div className="text-[10px] text-[#78716c] font-mono">
-                            {isOutreachSent ? "✉️ Caspian Email: SENT & DELIVERED" : "📱 Telegram Alert: Pending Approval"}
+                            {isOutreachSent ? "Caspian Email: sent and delivered" : "Telegram alert: pending approval"}
                           </div>
                         </td>
                         <td className="p-4 text-[#78716c]">
@@ -1370,7 +1398,7 @@ export default function DashboardPage() {
                       Target Founder Email: <strong>{selectedOpp.founder_intel.email}</strong>
                     </div>
                     <div className="text-[#78716c]">
-                      Status: {selectedOpp.stage === "OUTREACH_SENT" || selectedOpp.stage === "RESPONSE_SENT" ? "✅ SENT & DELIVERED via Caspian SMTP" : "⏳ Awaiting Manager APPROVE command"}
+                      Status: {selectedOpp.stage === "OUTREACH_SENT" || selectedOpp.stage === "RESPONSE_SENT" ? "Sent and delivered via Caspian SMTP" : "Awaiting manager APPROVE command"}
                     </div>
                   </div>
 
@@ -1399,6 +1427,8 @@ export default function DashboardPage() {
           )}
         </AnimatePresence>
       </main>
+        </div>
+      </div>
     </div>
   );
 }

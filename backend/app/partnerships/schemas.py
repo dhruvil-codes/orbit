@@ -46,7 +46,7 @@ class PartnershipOpportunityDTO(BaseModel):
     title: str
     compatibility_score: float = 0.0
     status: str = "discovered"
-    stage: str = "EVALUATED"
+    stage: Optional[str] = "EVALUATED"
     strategic_fit_summary: Optional[str] = None
     sender_name: Optional[str] = None
     sender_email: Optional[str] = None

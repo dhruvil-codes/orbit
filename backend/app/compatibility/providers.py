@@ -105,6 +105,7 @@ class OpenAILLMProvider(BaseLLMProvider):
             return await fallback.evaluate_pair(company_a, company_b)
 
         try:
+            import asyncio
             import openai
             client = openai.AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
             
@@ -139,7 +140,10 @@ class OpenAILLMProvider(BaseLLMProvider):
             if "gpt-" in settings.DEFAULT_LLM_MODEL.lower():
                 kwargs["response_format"] = {"type": "json_object"}
 
-            response = await client.chat.completions.create(**kwargs)
+            response = await asyncio.wait_for(
+                client.chat.completions.create(**kwargs),
+                timeout=8.0
+            )
             content = response.choices[0].message.content or "{}"
             
             if content.startswith("```"):

@@ -3,300 +3,403 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Flame,
-  Star,
-  Zap,
   ArrowRight,
-  ShieldCheck,
-  Brain,
-  Building2,
-  UserCheck,
-  Smartphone,
-  Mail,
   ArrowUpRight,
-  Layers,
-  Sparkles,
-  MessageSquare,
+  Brain,
   CheckCircle2,
+  ChevronDown,
+  Flame,
+  Layers,
+  Mail,
+  MessageSquare,
+  Radio,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  UserCheck,
+  Zap,
 } from "lucide-react";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const partners = ["Magic UI", "Resend", "Mintlify", "Senja", "Dub"];
+
+const proofCards = [
+  {
+    quote:
+      "Orbit gives us the exact reason a partnership makes sense before anything gets sent. It feels like having a calm operator beside the founder.",
+    name: "Dhruvil Mistry",
+    role: "Founder, Magic UI",
+  },
+  {
+    quote:
+      "The human approval step makes the automation feel trustworthy. We can move fast without losing the founder-to-founder tone.",
+    name: "Avery Stone",
+    role: "Partnerships Lead",
+  },
+];
+
+const workflow = [
+  {
+    icon: Search,
+    label: "Discover",
+    title: "Find niche-aligned SaaS partners",
+    body:
+      "Orbit reads your website, identifies ICP overlap, and ranks companies by strategic fit instead of shallow firmographics.",
+  },
+  {
+    icon: Brain,
+    label: "Reason",
+    title: "Generate evidence-backed fit cards",
+    body:
+      "Each recommendation explains why this company, why now, why this founder, and which collaboration angle should lead.",
+  },
+  {
+    icon: MessageSquare,
+    label: "Coordinate",
+    title: "Route approval through Caspian",
+    body:
+      "Telegram approval, email dispatch, partner replies, and response drafts all stay in one observable communication loop.",
+  },
+];
+
+const featureRows = [
+  {
+    title: "Transparent reasoning before outreach",
+    body:
+      "Orbit turns partner discovery into a structured review surface: market timing, ICP overlap, distribution upside, integration potential, and confidence are visible before a founder ever receives a message.",
+    stats: ["7 signal matrix", "6 rationale prompts", "1 human approval"],
+  },
+  {
+    title: "Caspian keeps every channel accountable",
+    body:
+      "Founder email, Telegram manager approvals, and inbound partner replies are treated as one deal lifecycle. The dashboard shows what happened, who approved it, and what should happen next.",
+    stats: ["Telegram", "Email gateway", "Reply listener"],
+  },
+];
+
+function OrbitMascot() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 160 150"
+      className="mascot-sticker"
+      fill="none"
+    >
+      <path d="M42 119c-9-18-7-45 6-66 13-20 34-31 55-23 20 8 30 30 29 52-1 24-13 45-34 54-21 8-46 4-56-17Z" />
+      <path d="M55 84c8-16 18-24 33-24 15 0 26 9 32 25" />
+      <path d="M67 89c5 10 14 15 25 15s20-5 26-15" />
+      <path d="M73 77h.5M106 77h.5" strokeLinecap="round" />
+      <path d="M61 49 43 32M113 45l19-15" />
+      <path d="M38 121c21 14 60 18 88 1" />
+    </svg>
+  );
+}
+
+function DashboardPreview() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay: 0.25 }}
+      className="floating-preview-card hero-preview"
+    >
+      <div className="preview-chrome">
+        <div className="chrome-dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+        <span>orbit.ai/workspace</span>
+        <strong>Live preview</strong>
+      </div>
+
+      <div className="dashboard-shell dashboard-muted-filter">
+        <aside className="preview-sidebar">
+          <div className="preview-logo">
+            <Flame size={14} />
+            Orbit
+          </div>
+          {["Discovery", "Reasoning", "Approvals", "Pipeline"].map((item, index) => (
+            <div className={index === 1 ? "preview-nav active" : "preview-nav"} key={item}>
+              {item}
+            </div>
+          ))}
+        </aside>
+
+        <div className="preview-main">
+          <div className="preview-header">
+            <div>
+              <span className="eyebrow">AI reasoning card</span>
+              <h3>Magic UI x Mintlify</h3>
+            </div>
+            <span className="score-pill">94 / 100</span>
+          </div>
+
+          <div className="metric-grid">
+            {["ICP overlap", "API fit", "Timing", "Co-market"].map((metric, index) => (
+              <div className="metric-card" key={metric}>
+                <span>{metric}</span>
+                <strong>{[93, 96, 92, 97][index]}</strong>
+              </div>
+            ))}
+          </div>
+
+          <div className="reasoning-panel">
+            <div className="reasoning-line wide" />
+            <div className="reasoning-line" />
+            <div className="reasoning-line short" />
+          </div>
+
+          <div className="timeline-list">
+            {[
+              ["Telegram approval", "Pending"],
+              ["Founder email", "Drafted"],
+              ["Partner reply", "Listening"],
+            ].map(([name, state]) => (
+              <div className="timeline-row" key={name}>
+                <span>{name}</span>
+                <strong>{state}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="tab-pill-group" aria-label="Preview tabs">
+        {["Dashboard", "Partners", "Reasoning", "Pipeline"].map((tab, index) => (
+          <span className={index === 0 ? "active" : ""} key={tab}>
+            {tab}
+          </span>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-[#0c0a09] font-sans selection:bg-[#c1e1f7] selection:text-[#3398e1]">
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          TOP NAVIGATION BAR (Seline Landing Aesthetic)
-         ───────────────────────────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-[#fafaf9]/90 backdrop-blur-md border-b border-[#e8e6e5] px-6 py-3.5">
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between">
-          {/* Logo & Brand Wordmark */}
-          <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 rounded-md bg-[#0c0a09] flex items-center justify-center text-white">
-              <Flame className="w-4 h-4 text-[#3ba6f1]" />
-            </div>
-            <span className="font-medium text-sm tracking-tight text-[#0c0a09]">
-              Orbit <span className="font-normal text-[#78716c]">AI PDR</span>
-            </span>
-          </div>
+    <main className="site-shell">
+      <nav className="top-nav">
+        <Link href="/" className="brand-mark" aria-label="Orbit home">
+          <span className="brand-glyph">
+            <Flame size={15} />
+          </span>
+          <span>Orbit</span>
+        </Link>
 
-          {/* Navigation Scroll Links */}
-          <div className="hidden md:flex items-center space-x-6 text-xs text-[#78716c] font-normal">
-            <a href="#vision" className="hover:text-[#0c0a09] transition-colors">
-              Vision &amp; Philosophy
-            </a>
-            <a href="#how-it-works" className="hover:text-[#0c0a09] transition-colors">
-              How Orbit Thinks
-            </a>
-            <a href="#caspian-architecture" className="hover:text-[#0c0a09] transition-colors">
-              Caspian Engine
-            </a>
-            <a href="#features" className="hover:text-[#0c0a09] transition-colors">
-              Capabilities
-            </a>
-          </div>
+        <div className="nav-links">
+          <a href="#workflow">Platform</a>
+          <a href="#features">Resources</a>
+          <a href="#proof">Proof</a>
+          <a href="#faq">About us</a>
+          <ChevronDown size={14} />
+        </div>
 
-          {/* Primary CTA button navigating to /dashboard */}
-          <div className="flex items-center space-x-3">
-            <Link
-              href="/dashboard"
-              className="btn-cyan-primary text-xs inline-flex items-center space-x-1.5 cursor-pointer"
-            >
-              <span>Open Partnership Workspace</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+        <div className="nav-actions">
+          <Link href="/dashboard" className="nav-login">
+            Sign in
+          </Link>
+          <Link href="/dashboard" className="btn-cyan-primary">
+            Open workspace
+          </Link>
         </div>
       </nav>
 
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          EDITORIAL LANDING HERO SECTION
-         ───────────────────────────────────────────────────────────────────────────── */}
-      <section id="vision" className="pt-20 pb-16 px-6 max-w-[1200px] mx-auto text-left space-y-12">
-        {/* Eyebrow & Display Headline */}
+      <section className="hero-section">
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-4 max-w-3xl"
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          transition={{ duration: 0.55 }}
+          className="hero-copy"
         >
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#ffffff] border border-[#e8e6e5] text-xs text-[#78716c]">
-            <Star className="w-3.5 h-3.5 text-[#0c0a09] fill-[#0c0a09]" />
-            <span>Autonomous AI Employee for B2B SaaS Partnerships &bull; Caspian SDK</span>
+          <div className="avatar-proof" aria-label="Trusted by SaaS founders">
+            <span>DM</span>
+            <span>AS</span>
+            <span>MK</span>
+            <span>RL</span>
           </div>
-
-          <h1 className="text-4xl sm:text-5xl md:text-[56px] font-serif-heading leading-[1.08] tracking-[-0.02em] text-[#0c0a09]">
-            The autonomous AI employee for B2B SaaS technology partnerships with{" "}
-            <span className="highlight-span">whispered precision</span>.
+          <h1>
+            Autonomous partnership development, made{" "}
+            <span className="highlight-span">simple & actionable</span>.
           </h1>
-
-          <p className="text-base text-[#78716c] leading-[1.69] max-w-2xl font-normal">
-            Orbit is not a cold email sender. Orbit is an autonomous Partnership Development Representative (PDR) that discovers strategic SaaS synergies, computes transparent AI Reasoning Cards, extracts founder intel, and executes human-in-the-loop multi-channel deal lifecycles over Telegram &amp; Email.
+          <p>
+            Orbit discovers strategic SaaS partners, explains the fit with transparent AI reasoning, and routes every outreach step through human approval before Caspian sends.
           </p>
-        </motion.div>
-
-        {/* Action Button Pair */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="flex flex-wrap items-center gap-4 pt-2"
-        >
-          <Link
-            href="/dashboard"
-            className="btn-cyan-primary flex items-center space-x-2 text-sm cursor-pointer"
-          >
-            <span>Open Partnership Workspace</span>
-            <Zap className="w-4 h-4" />
-          </Link>
-          <a href="#how-it-works" className="btn-ghost-secondary flex items-center space-x-2 text-sm cursor-pointer">
-            <span>Explore Architecture</span>
-            <ArrowRight className="w-4 h-4 text-[#78716c]" />
-          </a>
-        </motion.div>
-
-        {/* Hero Dashboard Preview Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.25 }}
-          className="floating-preview-card p-3 sm:p-4 border border-[#e8e6e5] space-y-3"
-        >
-          <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#e8e6e5] text-xs text-[#78716c]">
-            <div className="flex items-center space-x-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#e8e6e5]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#e8e6e5]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#e8e6e5]" />
-              <span className="ml-2 font-mono text-[11px]">orbit.ai/partnership-workspace</span>
-            </div>
-            <span className="text-[11px] text-[#3398e1] font-mono">LIVE CONCEPT</span>
-          </div>
-
-          <div className="stone-card p-6 bg-[#fafaf9] dashboard-muted-filter space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#e8e6e5] pb-4">
-              <div>
-                <span className="text-[11px] font-semibold text-[#78716c] uppercase tracking-wider">CORE PHILOSOPHY</span>
-                <div className="text-2xl font-serif-heading text-[#0c0a09] tracking-tight mt-1">
-                  Orbit THINKS. Caspian COMMUNICATES. The human CONTROLS.
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4 text-xs">
-                <div className="text-right">
-                  <div className="text-xs text-[#78716c]">Caspian Gateway</div>
-                  <div className="font-semibold text-[#3398e1]">Telegram + Email Active</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 3-Step Flow Preview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="stone-card p-4 space-y-1">
-                <h3 className="font-medium text-xs text-[#0c0a09]">1. Evidence &amp; Synergy Scraped</h3>
-                <p className="text-[#78716c] leading-relaxed">
-                  Live web research extracts API endpoints, ICP density, and strategic timing triggers.
-                </p>
-              </div>
-
-              <div className="stone-card p-4 space-y-1">
-                <h3 className="font-medium text-xs text-[#0c0a09]">2. Human Approval Requested</h3>
-                <p className="text-[#78716c] leading-relaxed">
-                  Orbit pings the PDR manager on Telegram with structured reasoning before sending.
-                </p>
-              </div>
-
-              <div className="stone-card p-4 space-y-1">
-                <h3 className="font-medium text-xs text-[#0c0a09]">3. Multi-Channel Deal Execution</h3>
-                <p className="text-[#78716c] leading-relaxed">
-                  Caspian SDK handles inbound partner email replies and advances deal lifecycle.
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          HOW IT WORKS / ARCHITECTURE SECTION
-         ───────────────────────────────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-16 px-6 max-w-[1200px] mx-auto space-y-12 border-t border-[#e8e6e5]">
-        <div className="space-y-3 max-w-2xl">
-          <div className="text-xs font-semibold text-[#78716c] uppercase tracking-wider flex items-center space-x-2">
-            <Layers className="w-4 h-4 text-[#3ba6f1]" />
-            <span>THE 3-STEP AUTONOMOUS WORKFLOW</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-serif-heading text-[#0c0a09]">
-            How Orbit transforms cold outreach into strategic deal flow.
-          </h2>
-        </div>
-
-        {/* 3-Step Process Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div whileHover={{ y: -3 }} className="stone-card p-6 space-y-3">
-            <div className="w-8 h-8 rounded-full bg-[#0c0a09] text-white flex items-center justify-center font-semibold text-xs">
-              1
-            </div>
-            <h3 className="font-medium text-base text-[#0c0a09]">Discover &amp; Evaluate Fit</h3>
-            <p className="text-xs text-[#78716c] leading-relaxed">
-              LangGraph nodes execute web research, extract API docs evidence, and use Featherless LLM inference to compute compatibility scores and 6-dimension AI Reasoning Cards.
-            </p>
-          </motion.div>
-
-          <motion.div whileHover={{ y: -3 }} className="stone-card p-6 space-y-3">
-            <div className="w-8 h-8 rounded-full bg-[#3ba6f1] text-white flex items-center justify-center font-semibold text-xs">
-              2
-            </div>
-            <h3 className="font-medium text-base text-[#0c0a09]">Telegram Manager Approval</h3>
-            <p className="text-xs text-[#78716c] leading-relaxed">
-              Orbit sends an interactive approval request to the manager over Telegram via Caspian SDK. The manager reviews the AI reasoning and replies <strong className="text-[#0c0a09]">APPROVE</strong> or <strong className="text-[#0c0a09]">REJECT</strong>.
-            </p>
-          </motion.div>
-
-          <motion.div whileHover={{ y: -3 }} className="stone-card p-6 space-y-3">
-            <div className="w-8 h-8 rounded-full bg-[#0c0a09] text-white flex items-center justify-center font-semibold text-xs">
-              3
-            </div>
-            <h3 className="font-medium text-base text-[#0c0a09]">Caspian Deal Escalation</h3>
-            <p className="text-xs text-[#78716c] leading-relaxed">
-              Upon approval, Caspian dispatches the proposal email to the partner executive. When the partner replies, Caspian catches the message, Orbit interprets the intent, and pings Telegram for response approval.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          CASPIAN SDK ARCHITECTURE DIAGRAM SECTION
-         ───────────────────────────────────────────────────────────────────────────── */}
-      <section id="caspian-architecture" className="py-16 px-6 max-w-[1200px] mx-auto space-y-8 border-t border-[#e8e6e5]">
-        <div className="stone-card p-8 space-y-6 bg-[#ffffff]">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#e8e6e5] pb-4">
-            <div className="space-y-1">
-              <h3 className="font-medium text-lg text-[#0c0a09] flex items-center space-x-2">
-                <MessageSquare className="w-5 h-5 text-[#3ba6f1]" />
-                <span>Caspian SDK Unified Communication Layer</span>
-              </h3>
-              <p className="text-xs text-[#78716c]">
-                One single handler model orchestrating Telegram, Email, Slack, and Discord.
-              </p>
-            </div>
-
-            <div className="flex items-center space-x-2 text-xs">
-              <span className="px-3 py-1 rounded-full bg-[#c1e1f7] text-[#3398e1] font-medium">
-                Caspian SDK 0.6.4 Connected
-              </span>
-            </div>
-          </div>
-
-          {/* Visual Architecture Diagram */}
-          <div className="p-6 rounded-lg bg-[#fafaf9] border border-[#e8e6e5] space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-center text-xs">
-              <div className="stone-card p-3 font-medium text-[#0c0a09]">
-                <Brain className="w-4 h-4 mx-auto text-[#0c0a09] mb-1" />
-                Orbit Intelligence
-              </div>
-              <div className="flex items-center justify-center text-[#78716c] font-mono text-[10px]">
-                &rarr; Approval &rarr;
-              </div>
-              <div className="stone-card p-3 font-medium text-[#3398e1] border-[#3ba6f1]">
-                <Smartphone className="w-4 h-4 mx-auto text-[#3ba6f1] mb-1" />
-                Telegram (@OrbitPDRBot)
-              </div>
-              <div className="flex items-center justify-center text-[#78716c] font-mono text-[10px]">
-                &rarr; Caspian SDK &rarr;
-              </div>
-              <div className="stone-card p-3 font-medium text-[#0c0a09]">
-                <Mail className="w-4 h-4 mx-auto text-[#0c0a09] mb-1" />
-                Partner Email
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          FOOTER (Seline Editorial Footer)
-         ───────────────────────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-[#e8e6e5] bg-[#fafaf9] px-6 py-10 text-xs text-[#78716c]">
-        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-[#0c0a09] font-medium">
-              <Flame className="w-4 h-4 text-[#3ba6f1]" />
-              <span>Orbit AI PDR &bull; Caspian Buildathon</span>
-            </div>
-            <p className="text-[#78716c] text-[11px]">
-              Autonomous AI employee for SaaS technology partnerships.
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Link
-              href="/dashboard"
-              className="btn-cyan-primary text-xs inline-flex items-center space-x-1.5 cursor-pointer"
-            >
-              <span>Open Partnership Workspace</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+          <div className="hero-actions">
+            <Link href="/dashboard" className="btn-cyan-primary">
+              Start with your SaaS
+              <ArrowUpRight size={16} />
             </Link>
+            <a href="#workflow" className="btn-ghost-secondary">
+              View workflow
+              <ArrowRight size={16} />
+            </a>
           </div>
+        </motion.div>
+
+        <div className="partner-strip" aria-label="Example partner ecosystem">
+          {partners.map((partner) => (
+            <span key={partner}>{partner}</span>
+          ))}
         </div>
+
+        <div className="rating-line">
+          <span aria-hidden="true">*****</span>
+          <p>Founder-ready partnership intelligence, routed through Caspian.</p>
+        </div>
+
+        <DashboardPreview />
+      </section>
+
+      <section id="proof" className="testimonial-grid">
+        {proofCards.map((card) => (
+          <motion.article
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.45 }}
+            className="testimonial-card"
+            key={card.name}
+          >
+            <div className="stars">*****</div>
+            <p>&quot;{card.quote}&quot;</p>
+            <div className="person-row">
+              <span>{card.name.split(" ").map((name) => name[0]).join("")}</span>
+              <div>
+                <strong>{card.name}</strong>
+                <small>{card.role}</small>
+              </div>
+            </div>
+          </motion.article>
+        ))}
+      </section>
+
+      <section id="workflow" className="section-stack">
+        <div className="section-heading">
+          <span className="eyebrow">
+            <Layers size={16} />
+            The workflow
+          </span>
+          <h2>
+            Orbit thinks, Caspian communicates, the{" "}
+            <span className="highlight-span">human controls</span>.
+          </h2>
+          <p>
+            The product experience is intentionally narrow: discover the right companies, prove the strategic fit, and coordinate the message without hiding the decision from the founder.
+          </p>
+        </div>
+
+        <div className="workflow-grid">
+          {workflow.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <motion.article
+                whileHover={{ y: -4 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="stone-card feature-card"
+                key={item.title}
+              >
+                <div className="step-icon">
+                  <Icon size={17} />
+                  <span>{index + 1}</span>
+                </div>
+                <span className="eyebrow">{item.label}</span>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </motion.article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section id="features" className="feature-showcase">
+        <OrbitMascot />
+        {featureRows.map((feature) => (
+          <motion.article
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.45 }}
+            className="feature-row"
+            key={feature.title}
+          >
+            <div>
+              <h2>
+                {feature.title.includes("reasoning") ? (
+                  <>
+                    Transparent <span className="highlight-span">reasoning</span> before outreach
+                  </>
+                ) : (
+                  <>
+                    Caspian keeps every <span className="highlight-span">channel</span> accountable
+                  </>
+                )}
+              </h2>
+              <p>{feature.body}</p>
+            </div>
+            <div className="mini-dashboard">
+              {feature.stats.map((stat) => (
+                <div key={stat}>
+                  <CheckCircle2 size={16} />
+                  <span>{stat}</span>
+                </div>
+              ))}
+            </div>
+          </motion.article>
+        ))}
+      </section>
+
+      <section id="faq" className="quiet-grid">
+        {[
+          ["Privacy-first outreach", ShieldCheck],
+          ["Caspian approval loop", Radio],
+          ["Founder intelligence", UserCheck],
+          ["Message drafting", Mail],
+          ["Strategic signals", Sparkles],
+          ["Deal lifecycle", Zap],
+        ].map(([label, Icon]) => {
+          const CardIcon = Icon as typeof ShieldCheck;
+          return (
+            <div className="quiet-item" key={label as string}>
+              <CardIcon size={17} />
+              <span>{label as string}</span>
+            </div>
+          );
+        })}
+      </section>
+
+      <section className="final-cta">
+        <h2>
+          Build your partner pipeline with <span className="highlight-span">less noise</span>.
+        </h2>
+        <p>Start from a SaaS URL, review the reasoning, approve the message, and let Orbit keep the deal state visible.</p>
+        <div className="hero-actions">
+          <Link href="/dashboard" className="btn-cyan-primary">
+            Open partnership workspace
+            <ArrowUpRight size={16} />
+          </Link>
+          <a href="#workflow" className="btn-ghost-secondary">
+            See the system
+          </a>
+        </div>
+      </section>
+
+      <footer className="site-footer">
+        <div className="brand-mark">
+          <span className="brand-glyph">
+            <Flame size={15} />
+          </span>
+          <span>Orbit AI PDR</span>
+        </div>
+        <span>Autonomous SaaS partnership development with human approval.</span>
       </footer>
-    </div>
+    </main>
   );
 }
