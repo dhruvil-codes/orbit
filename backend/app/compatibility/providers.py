@@ -1,11 +1,14 @@
 """
 Modular LLM Provider Interface for Compatibility Intelligence
-Enables seamlessly swapping LLM backends (OpenAI, Anthropic, Gemini, Mock).
+Enables seamlessly swapping LLM backends (OpenAI, Featherless.ai, Anthropic, Gemini, Mock).
 """
 import json
+import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 from app.shared.config import settings
+
+logger = logging.getLogger("orbit.llm_provider")
 
 class BaseLLMProvider(ABC):
     @abstractmethod
@@ -56,38 +59,56 @@ class MockLLMProvider(BaseLLMProvider):
         }
 
 class OpenAILLMProvider(BaseLLMProvider):
-    """OpenAI API provider for production LLM analysis."""
+    """OpenAI / Featherless.ai API provider for production LLM analysis."""
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
         self.api_key = api_key or settings.OPENAI_API_KEY
+        self.base_url = base_url or getattr(settings, "OPENAI_API_BASE", None)
 
     async def evaluate_pair(
         self, company_a: Dict[str, Any], company_b: Dict[str, Any]
     ) -> Dict[str, Any]:
         if not self.api_key:
-            # Fallback to mock if API key is not present
+            logger.info("OPENAI_API_KEY not set. Using MockLLMProvider for evaluation.")
             fallback = MockLLMProvider()
             return await fallback.evaluate_pair(company_a, company_b)
 
-        # Implementation structure ready for OpenAI client calls
-        import openai
-        client = openai.AsyncOpenAI(api_key=self.api_key)
-        
-        prompt = f"""
-        Analyze strategic SaaS partnership potential between:
-        Company A: {json.dumps(company_a)}
-        Company B: {json.dumps(company_b)}
-        
-        Return JSON with:
-        compatibility_score (0-100), confidence_score (0-100), strategic_fit_summary,
-        partnership_ideas (list), integration_opportunities (list),
-        co_marketing_opportunities (list), recommended_outreach_angle.
-        """
-        
-        response = await client.chat.completions.create(
-            model=settings.DEFAULT_LLM_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            response_format={"type": "json_object"}
-        )
-        content = response.choices[0].message.content
-        return json.loads(content)
+        try:
+            import openai
+            client = openai.AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
+            
+            prompt = f"""
+            Analyze strategic SaaS partnership potential between:
+            Company A: {json.dumps(company_a)}
+            Company B: {json.dumps(company_b)}
+            
+            Return ONLY a valid JSON object with keys:
+            - compatibility_score (float 0-100)
+            - confidence_score (float 0-100)
+            - strategic_fit_summary (string)
+            - partnership_ideas (list of strings)
+            - integration_opportunities (list of strings)
+            - co_marketing_opportunities (list of strings)
+            - recommended_outreach_angle (string)
+            """
+            
+            kwargs = {
+                "model": settings.DEFAULT_LLM_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+            }
+            # Add json_object format if supported
+            if "gpt-" in settings.DEFAULT_LLM_MODEL.lower():
+                kwargs["response_format"] = {"type": "json_object"}
+
+            response = await client.chat.completions.create(**kwargs)
+            content = response.choices[0].message.content or "{}"
+            
+            # Clean content if markdown codeblocks present
+            if content.startswith("```"):
+                content = content.split("```json")[-1].split("```")[0].strip()
+                
+            return json.loads(content)
+        except Exception as e:
+            logger.error(f"LLM Provider execution error: {e}. Falling back to deterministic provider.")
+            fallback = MockLLMProvider()
+            return await fallback.evaluate_pair(company_a, company_b)
