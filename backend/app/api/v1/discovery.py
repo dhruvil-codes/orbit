@@ -1,21 +1,68 @@
 """
 Discovery Domain HTTP Controller
-Exposes auto-discovery endpoint that identifies top 3 strategic partner opportunities for any SaaS domain.
+Exposes SaaS URL Metadata Analysis & TrustMRR/Product Hunt Partner Discovery endpoints.
 """
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from app.discovery.service import DiscoveryService
+from app.research.company_research import CompanyResearchEngine
 
 router = APIRouter(prefix="/discovery", tags=["Discovery Engine"])
 discovery_service = DiscoveryService()
+research_engine = CompanyResearchEngine()
+
+class AnalyzeMetadataRequest(BaseModel):
+    domain: str = Field(..., description="User's SaaS website domain (e.g. superx.com)")
 
 class DiscoverPartnersRequest(BaseModel):
-    domain: str = Field(..., description="User's SaaS website domain (e.g. notion.so)")
+    domain: str = Field(..., description="User's SaaS website domain (e.g. superx.com)")
+
+@router.post("/analyze-metadata")
+async def analyze_saas_metadata(req: AnalyzeMetadataRequest):
+    """
+    Step 1: Scrapes live website metadata (title, description, category, ICP, developer API status)
+    for the user's entered SaaS URL.
+    """
+    clean_domain = req.domain.lower().replace("https://", "").replace("http://", "").replace("www.", "").strip("/")
+    if "/" in clean_domain:
+        clean_domain = clean_domain.split("/")[0]
+
+    brand_name = clean_domain.split(".")[0].capitalize() if "." in clean_domain else clean_domain.capitalize()
+    scraped = await research_engine.analyze_company(clean_domain)
+
+    # Determine category
+    desc_lower = (scraped.get("description") or "").lower()
+    title_lower = (scraped.get("title") or "").lower()
+
+    if any(k in desc_lower or k in title_lower for k in ["code", "dev", "git", "api", "build", "deploy", "stack"]):
+        category = "Developer Tools & Infrastructure"
+        target_icp = "Software Engineers, Product Managers & Tech Teams"
+    elif any(k in desc_lower or k in title_lower for k in ["form", "survey", "feedback", "chat", "bot"]):
+        category = "Customer Engagement & Feedback"
+        target_icp = "SaaS Founders, Product Managers & Growth Teams"
+    elif any(k in desc_lower or k in title_lower for k in ["social", "twitter", "linkedin", "content", "post"]):
+        category = "Social Growth & Content Platform"
+        target_icp = "Founders, Creators & Growth Marketers"
+    else:
+        category = "B2B SaaS Growth & Productivity"
+        target_icp = "SaaS Founders, Remote Teams & Growth Leaders"
+
+    return {
+        "domain": clean_domain,
+        "brand_name": brand_name,
+        "title": scraped.get("title") or f"{brand_name} — Modern B2B SaaS Platform",
+        "description": scraped.get("description") or f"Modern B2B SaaS application operating on {clean_domain}.",
+        "category": category,
+        "target_icp": target_icp,
+        "has_developer_api": scraped.get("has_developer_api", False),
+        "developer_links": scraped.get("developer_links", []),
+        "status": scraped.get("status", "scraped")
+    }
 
 @router.post("/discover-partners")
 async def discover_top_partners(req: DiscoverPartnersRequest):
     """
-    Given a single SaaS website URL, automatically discovers top 3 strategic partner companies.
+    Step 2: Matches user's analyzed SaaS against real, emerging independent SaaS startups (Product Hunt, TrustMRR, YC).
     """
     partners = await discovery_service.discover_top_partners(req.domain)
     return {"domain": req.domain, "top_partners": partners}
