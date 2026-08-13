@@ -17,7 +17,7 @@ INDIE_SAAS_CATALOG = [
         "domain": "senja.io",
         "industry": "Testimonials & Social Proof",
         "description": "Collect, manage, and display video & text testimonials for SaaS",
-        "compatibility_score": 93.0,
+        "compatibility_score": 95.0,
         "synergy_reason": "Cross-promote testimonial widgets to increase checkout conversion rates for joint customers.",
         "executive_lead": {"name": "Wilson Wilson", "role": "Co-founder", "email": "wilson@senja.io"},
         "recent_news": "Crossed $45,000 MRR on TrustMRR; launched new open widget API.",
@@ -28,7 +28,7 @@ INDIE_SAAS_CATALOG = [
         "domain": "tally.so",
         "industry": "No-code Form Builder",
         "description": "The simplest free form builder for indie hackers and modern SaaS teams",
-        "compatibility_score": 91.0,
+        "compatibility_score": 93.0,
         "synergy_reason": "Embed lead capture forms & automated survey triggers inside user onboarding flows.",
         "executive_lead": {"name": "Marie Martens", "role": "Co-founder", "email": "marie@tally.so"},
         "recent_news": "Surpassed $100,000 MRR bootstrapped; introduced custom webhooks v2.",
@@ -39,7 +39,7 @@ INDIE_SAAS_CATALOG = [
         "domain": "dubs.co",
         "industry": "Link Infrastructure & Attribution",
         "description": "Open-source link management and short link attribution platform for SaaS",
-        "compatibility_score": 89.0,
+        "compatibility_score": 91.0,
         "synergy_reason": "Bi-directional referral link tracking & partner campaign analytics integration.",
         "executive_lead": {"name": "Steven Tey", "role": "Founder", "email": "steven@dubs.co"},
         "recent_news": "Featured #1 on TrustMRR; open-sourced short link analytics engine.",
@@ -87,7 +87,7 @@ INDIE_SAAS_CATALOG = [
         "synergy_reason": "Co-market product demo video creation tools to SaaS founders.",
         "executive_lead": {"name": "Adam Pitts", "role": "Founder", "email": "adam@screen.studio"},
         "recent_news": "Passed $60,000 MRR on TrustMRR; launched auto-zoom v3.",
-        "category": "design"
+        "category": "marketing"
     },
     {
         "name": "Plunk",
@@ -128,7 +128,7 @@ class DiscoveryService:
     async def discover_top_partners(self, domain: str) -> List[Dict[str, Any]]:
         """
         Given ANY SaaS website domain (e.g. canivibecodeit.com, senja.io, tally.so, myapp.com),
-        automatically matches top 3 emerging independent SaaS companies (TrustMRR / Product Hunt ecosystem)
+        automatically matches ALL emerging independent SaaS companies (TrustMRR / Product Hunt ecosystem)
         that are eager and ready to co-market & partner with independent founders.
         """
         domain_clean = domain.lower().replace("https://", "").replace("http://", "").replace("www.", "").strip("/")
@@ -145,16 +145,16 @@ class DiscoveryService:
         except Exception as err:
             logger.warning(f"Featherless LLM discovery failed for {domain_clean}: {err}")
 
-        # 2. Match from curated TrustMRR / Product Hunt Independent SaaS Ecosystem
+        # 2. Return ALL matching Independent SaaS companies from catalog
         is_dev = any(term in domain_clean for term in ["vibe", "code", "dev", "git", "api", "build", "deploy", "stack", "lab", "hack"])
         if is_dev:
-            # Match top 3 developer indie SaaS (e.g. Mintlify, Dubs.co, Unkey)
-            matches = [p for p in INDIE_SAAS_CATALOG if p["category"] == "developer" or p["name"] in ["Dubs.co", "Senja", "Typebot"]]
-            return self._customize_partners(matches[:3], domain_clean, brand_name)
+            # Sort developer & product partners first
+            matches = sorted(INDIE_SAAS_CATALOG, key=lambda x: (x["category"] != "developer", -x["compatibility_score"]))
+            return self._customize_partners(matches, domain_clean, brand_name)
         else:
-            # Match top 3 marketing/product indie SaaS (e.g. Senja, Tally, Dubs)
-            matches = [p for p in INDIE_SAAS_CATALOG if p["category"] == "marketing" or p["name"] in ["Tally Forms", "Senja", "Dubs.co"]]
-            return self._customize_partners(matches[:3], domain_clean, brand_name)
+            # Sort marketing & growth partners first
+            matches = sorted(INDIE_SAAS_CATALOG, key=lambda x: (x["category"] != "marketing", -x["compatibility_score"]))
+            return self._customize_partners(matches, domain_clean, brand_name)
 
     def _customize_partners(self, partners: List[Dict[str, Any]], domain: str, brand: str) -> List[Dict[str, Any]]:
         """Tailors partner synergy descriptions specifically to the user's custom SaaS brand."""
@@ -166,7 +166,7 @@ class DiscoveryService:
         return customized
 
     async def _discover_indie_partners_via_llm(self, domain: str, brand: str) -> List[Dict[str, Any]]:
-        """Invokes Featherless LLM to generate 3 REAL, emerging independent SaaS partners (TrustMRR / Product Hunt tier)."""
+        """Invokes Featherless LLM to generate ALL REAL, emerging independent SaaS partners (TrustMRR / Product Hunt tier)."""
         if not settings.FEATHERLESS_API_KEY:
             return []
 
@@ -174,13 +174,13 @@ class DiscoveryService:
         Act as an expert Indie SaaS & Micro-SaaS Partnership Broker specializing in startups listed on TrustMRR.com, Product Hunt, and Y Combinator.
         
         The user owns the SaaS website '{domain}' (Brand Name: '{brand}').
-        Identify the 3 BEST REAL INDEPENDENT / EMERGING SaaS companies (MRR $5k - $100k) that would realistically want to partner, co-market, or integrate with '{brand}'.
+        Identify 6 to 8 REAL INDEPENDENT / EMERGING SaaS companies (MRR $5k - $100k) that would realistically want to partner, co-market, or integrate with '{brand}'.
         
         CRITICAL RULE:
         - Do NOT suggest massive enterprise monopolies (Google, Microsoft, Stripe, Salesforce, Adobe, Notion, Slack).
         - Suggest REAL, independent, founder-led SaaS startups (e.g. Senja, Tally, Dubs.co, Typebot, Mintlify, PostHog, Screen Studio, Plunk, Polar.sh, Formbricks, etc.).
         
-        Return ONLY a JSON array containing exactly 3 objects with these keys:
+        Return ONLY a JSON array containing 6 to 8 objects with these keys:
         - "name": string (Real Independent SaaS Name)
         - "domain": string (e.g. senja.io, dubs.co, tally.so)
         - "industry": string
@@ -202,10 +202,10 @@ class DiscoveryService:
                 {"role": "user", "content": prompt},
             ],
             "temperature": 0.4,
-            "max_tokens": 1000,
+            "max_tokens": 1500,
         }
 
-        async with httpx.AsyncClient(timeout=12.0) as client:
+        async with httpx.AsyncClient(timeout=14.0) as client:
             res = await client.post("https://api.featherless.ai/v1/chat/completions", headers=headers, json=payload)
             if res.status_code == 200:
                 data = res.json()
@@ -217,5 +217,5 @@ class DiscoveryService:
                 
                 parsed = json.loads(content)
                 if isinstance(parsed, list) and len(parsed) >= 3:
-                    return parsed[:3]
+                    return parsed
         return []
