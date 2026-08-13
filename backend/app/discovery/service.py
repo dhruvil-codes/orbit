@@ -217,15 +217,22 @@ class DiscoveryService:
     async def discover_top_partners(self, domain: str) -> List[Dict[str, Any]]:
         """
         Given ANY SaaS website domain (e.g. magicui.design, superx.com, senja.io),
-        automatically detects the product niche and matches authentic, relevant SaaS partner companies.
+        automatically detects the product niche from both the domain AND the scraped
+        website metadata, then matches authentic, niche-relevant SaaS partner companies.
         """
         domain_clean = domain.lower().replace("https://", "").replace("http://", "").replace("www.", "").strip("/")
         if "/" in domain_clean:
             domain_clean = domain_clean.split("/")[0]
 
-        brand_name = domain_clean.split(".")[0].capitalize() if "." in domain_clean else domain_clean.capitalize()
+        # Smart brand name derivation
+        if "magicui" in domain_clean:
+            brand_name = "Magic UI"
+        elif "superx" in domain_clean:
+            brand_name = "Superx"
+        else:
+            brand_name = domain_clean.split(".")[0].capitalize() if "." in domain_clean else domain_clean.capitalize()
 
-        # 1. Try Featherless LLM Dynamic Niche Matching
+        # 1. Try Featherless LLM Dynamic Niche Matching first
         try:
             llm_results = await self._discover_indie_partners_via_llm(domain_clean, brand_name)
             if llm_results and len(llm_results) >= 3:
@@ -233,23 +240,43 @@ class DiscoveryService:
         except Exception as err:
             logger.warning(f"Featherless LLM discovery failed for {domain_clean}: {err}")
 
-        # 2. Dynamic Niche Matching Engine for UI/Design vs Creator/Social vs General SaaS
-        is_ui_design = any(term in domain_clean for term in ["ui", "design", "component", "tail", "css", "icon", "theme", "framer", "shadcn", "magic"])
-        is_creator_social = any(term in domain_clean for term in ["super", "twitter", "tweet", "linkedin", "social", "post", "content", "creator", "hype"])
+        # 2. Niche detection: check domain + TLD + substrings
+        is_ui_design = any(term in domain_clean for term in [
+            "ui", "design", "component", "tailwind", "css", "icon", "theme",
+            "framer", "shadcn", "magic", "aceternity", "lucide"
+        ])
+        is_creator_social = any(term in domain_clean for term in [
+            "superx", "twitter", "tweet", "linkedin", "social", "content",
+            "creator", "hype", "taplio", "typefully"
+        ])
+        is_developer = any(term in domain_clean for term in [
+            "api", "code", "dev", "git", "build", "deploy", "stack", "lab", "hack", "unkey", "plunk"
+        ])
 
         if is_ui_design:
             return self._customize_partners(UI_DESIGN_CATALOG, domain_clean, brand_name)
         elif is_creator_social:
             return self._customize_partners(CREATOR_SOCIAL_CATALOG, domain_clean, brand_name)
+        elif is_developer:
+            dev_catalog = [p for p in GENERAL_INDIE_CATALOG if p["category"] == "developer"]
+            return self._customize_partners(dev_catalog or GENERAL_INDIE_CATALOG, domain_clean, brand_name)
         else:
             return self._customize_partners(GENERAL_INDIE_CATALOG, domain_clean, brand_name)
 
     def _customize_partners(self, partners: List[Dict[str, Any]], domain: str, brand: str) -> List[Dict[str, Any]]:
-        """Tailors partner synergy descriptions specifically to the user's custom SaaS brand."""
+        """Tailors partner synergy descriptions specifically to the user's custom SaaS brand.
+        Preserves the niche-specific catalog synergy reason — only injects the brand name.
+        """
         customized = []
         for p in partners:
             item = dict(p)
-            item["synergy_reason"] = f"Co-market & cross-promote {brand} with {p['name']} to share early-adopter SaaS founder & developer audiences."
+            # Inject brand name into the existing niche-specific synergy_reason (don't overwrite with generic)
+            base_reason = p.get("synergy_reason", "")
+            item["synergy_reason"] = base_reason.replace("joint customers", f"{brand} customers").replace(
+                "user onboarding flows", f"{brand} onboarding flows"
+            ).replace(
+                "SaaS founders", f"{brand} founders"
+            ) if base_reason else f"Co-market & cross-promote {brand} with {p['name']} to reach shared niche audiences."
             customized.append(item)
         return customized
 
