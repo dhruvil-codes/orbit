@@ -49,6 +49,7 @@ class PartnershipOpportunity(Base):
     reasoning_card: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     outreach_drafts: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     timeline_events: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    caspian_execution_details: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

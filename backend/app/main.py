@@ -26,6 +26,7 @@ async def lifespan(app: FastAPI):
             ('reasoning_card', 'JSON'),
             ('outreach_drafts', 'JSON'),
             ('timeline_events', 'JSON'),
+            ('caspian_execution_details', 'JSON'),
         ]
         for col_name, col_type in cols_to_add:
             try:

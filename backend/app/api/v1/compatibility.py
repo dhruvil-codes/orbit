@@ -125,7 +125,19 @@ async def evaluate_compatibility(
         }
     ]
 
-    # 5. Persist Opportunity in DB
+    # 5. Send Telegram Manager Approval Alert via Caspian SDK
+    alert_res = await dispatcher.send_manager_alert(
+        conversation_id="",
+        opportunity_title=f"{req.company_a.name} & {req.company_b.name} Partnership",
+        compatibility_score=comp_score,
+        confidence_score=final_state["confidence_score"],
+        reasoning_summary=final_state["reasoning_card"],
+        opportunity_id="opp_pending",
+        recipient_email=founder_intel["email"],
+        proposed_body=outreach_drafts["email_body"],
+    )
+
+    # 6. Persist Opportunity in DB with Caspian Execution Details
     service = PartnershipService(session)
     company_a_dto = await service.get_or_create_company(PartnerCompanyCreate(**req.company_a.model_dump()))
     company_b_dto = await service.get_or_create_company(PartnerCompanyCreate(**req.company_b.model_dump()))
@@ -146,20 +158,9 @@ async def evaluate_compatibility(
             founder_intel=founder_intel,
             reasoning_card=final_state["reasoning_card"],
             outreach_drafts=outreach_drafts,
-            timeline_events=timeline_events
+            timeline_events=timeline_events,
+            caspian_execution_details=alert_res
         )
-    )
-
-    # 6. Send Telegram Manager Approval Alert via Caspian SDK
-    alert_res = await dispatcher.send_manager_alert(
-        conversation_id="",
-        opportunity_title=opp_dto.title,
-        compatibility_score=comp_score,
-        confidence_score=final_state["confidence_score"],
-        reasoning_summary=final_state["reasoning_card"],
-        opportunity_id=opp_dto.id,
-        recipient_email=founder_intel["email"],
-        proposed_body=outreach_drafts["email_body"],
     )
 
     return {
@@ -173,6 +174,7 @@ async def evaluate_compatibility(
         "status": opp_dto.status,
         "stage": "AWAITING_APPROVAL",
         "dispatch_status": alert_res.get("status", "alert_sent"),
+        "caspian_execution_details": alert_res,
         "compatibility_result": final_state["compatibility_result"],
         "reasoning_card": final_state["reasoning_card"],
         "evidence_signals": evidence_signals,

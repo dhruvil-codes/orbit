@@ -38,6 +38,7 @@ class PartnershipOpportunityCreate(BaseModel):
     reasoning_card: Optional[Dict[str, Any]] = None
     outreach_drafts: Optional[Dict[str, Any]] = None
     timeline_events: Optional[List[Dict[str, Any]]] = None
+    caspian_execution_details: Optional[Dict[str, Any]] = None
 
 class PartnershipOpportunityDTO(BaseModel):
     id: str
@@ -56,6 +57,7 @@ class PartnershipOpportunityDTO(BaseModel):
     reasoning_card: Optional[Dict[str, Any]] = None
     outreach_drafts: Optional[Dict[str, Any]] = None
     timeline_events: Optional[List[Dict[str, Any]]] = None
+    caspian_execution_details: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: datetime
     primary_company: Optional[PartnerCompanyDTO] = None
